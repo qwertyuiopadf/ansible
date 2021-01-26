@@ -1,0 +1,152 @@
+---
+- hosts: all
+  remote_user: root
+  tasks:
+###目标文件添加
+  - name: add a line
+    lineinfile:
+      dest: /etc/apt/sources.list
+      line:  deb https://mirrors.aliyun.com/ubuntu/ bionic main restricted universe multiverse
+  - name: add a line
+    lineinfile:
+      dest: /etc/apt/sources.list
+      line:  deb https://mirrors.aliyun.com/ubuntu/ bionic-updates main restricted universe multiverse
+  - name: add a line
+    lineinfile:
+      dest: /etc/apt/sources.list
+      line:  deb https://mirrors.aliyun.com/ubuntu/ bionic-backports main restricted universe multiverse
+  - name: add a line
+    lineinfile:
+      dest: /etc/apt/sources.list
+      line:  deb https://mirrors.aliyun.com/ubuntu/ bionic-security main restricted universe multiverse
+  - name: add a line
+    lineinfile:
+      dest: /etc/apt/sources.list
+      line:  deb https://mirrors.aliyun.com/ubuntu/ bionic-proposed main restricted universe multiverse
+  - name: add a line
+    lineinfile:
+      dest: /etc/apt/sources.list
+      line:  deb-src https://mirrors.aliyun.com/ubuntu/ bionic main restricted universe multiverse
+  - name: add a line
+    lineinfile:
+      dest: /etc/apt/sources.list
+      line:  deb-src https://mirrors.aliyun.com/ubuntu/ bionic-backports main restricted universe multiverse
+  - name: add a line
+    lineinfile:
+      dest: /etc/apt/sources.list
+      line:  deb-src https://mirrors.aliyun.com/ubuntu/ bionic-backports main restricted universe multiverse
+  - name: add a line
+    lineinfile:
+      dest: /etc/apt/sources.list
+      line:  deb-src https://mirrors.aliyun.com/ubuntu/ bionic-security main restricted universe multiverse
+  - name: add a line
+    lineinfile:
+      dest: /etc/apt/sources.list
+      line:  deb-src https://mirrors.aliyun.com/ubuntu/ bionic-proposed main restricted universe multiverse
+####apt upgrade -y
+  - name: apt upgrade -y
+    command: apt upgrade -y
+  - name: apt install
+    apt: name=openssh-server  state=present
+    apt: name=ocl-icd-opencl-dev state=present
+    apt: name=ntpdate  state=present
+    apt: name=ubuntu-drivers-common  state=present
+    apt: name=libhwloc-dev  state=present
+#####创建软连接
+  - name: file
+    command: ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+#####ntpdate ntp.aliyun.com
+  - name: apt upgrade -y
+    command: ntpdate ntp.aliyun.com
+####install ulimit
+  - name: ulimit
+    shell: /bin/bash -c "ulimit -n 1048576" 
+  - name: delete a line
+    lineinfile:
+      dest: /etc/security/limits.conf
+      regex: '^nofile'
+      state: absent
+  - name: add a line
+    lineinfile:
+      dest: /etc/security/limits.conf
+      line: '* hard nofile 1048576'
+  - name: add a line
+    lineinfile:
+      dest: /etc/security/limits.conf
+      line: '* soft nofile 1048576'
+  - name: add a line
+    lineinfile:
+      dest: /etc/security/limits.conf
+      line: root hard nofile 1048576
+  - name: add a line
+    lineinfile:
+      dest: /etc/security/limits.conf
+      line: root soft nofile 1048576
+####swap
+  - name: swap
+    script: /home/playbook/swap.sh
+####GPU
+  - name: GPU
+    command: sudo add-apt-repository -y ppa:graphics-drivers/ppa
+ # - name: ubuntu
+  #  command: sudo apt-get install nvidia-driver-450
+####写入环境变量
+  - name: add a line
+    lineinfile:
+      dest: /etc/profile
+      line:  export IPFS_GATEWAY="https://proof-parameters.s3.cn-south-1.jdcloud-oss.com/ipfs/"
+  - name: add a line
+    lineinfile:
+      dest: /etc/profile
+      line:  export LOTUS_STORAGE_PATH=/home/data/storage
+  - name: add a line
+    lineinfile:
+      dest: /etc/profile
+      line:  export FIL_PROOFS_MAXIMIZE_CACHING=1
+  - name: add a line
+    lineinfile:
+      dest: /etc/profile
+      line:  export RUST_LOG=Debug
+  - name: add a line
+    lineinfile:
+      dest: /etc/profile
+      line:  export FIL_PROOFS_USE_GPU_COLUMN_BUILDER=1
+  - name: add a line
+    lineinfile:
+      dest: /etc/profile
+      line:  export FIL_PROOFS_USE_GPU_TREE_BUILDER=1
+  - name: add a line
+    lineinfile:
+      dest: /etc/profile
+      line:  export FIL_PROOFS_PARENT_CACHE=/home/data/
+  - name: add a line
+    lineinfile:
+      dest: /etc/profile
+      line:  export FIL_PROOFS_USE_MULTICORE_SDR=1
+  - name: add a line
+    lineinfile:
+      dest: /etc/profile
+      line:  export GOLOG_LOG_FMT=json
+  - name: source /etc/profile
+    shell: /bin/bash -c "source /etc/profile"
+####关闭自动更新
+  - name: stop
+    systemd: 
+      state: stopped 
+      name: apt-daily.service
+      enabled: no
+  - name: stop
+    systemd: 
+      state: stopped 
+      name: apt-daily.timer
+      enabled: no
+  - name: stop
+    systemd: 
+      state: stopped 
+      name: apt-daily-upgrade.service
+      enabled: no
+  - name: stop
+    systemd: 
+      state: stopped 
+      name: apt-daily-upgrade.timer
+      enabled: no
