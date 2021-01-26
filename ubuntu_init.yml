@@ -84,7 +84,7 @@
       line: root soft nofile 1048576
 ####swap
   - name: swap
-    script: /home/playbook/swap.sh
+    script: swap.sh
 ####GPU
   - name: GPU
     command: sudo add-apt-repository -y ppa:graphics-drivers/ppa
