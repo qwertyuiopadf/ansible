@@ -1,0 +1,95 @@
+---
+- hosts: all
+  remote_user: root
+  tasks:
+    - name: 复制lotus-worker
+      copy:
+        src=/usr/local/bin/lotus-worker 
+        dest=/usr/local/bin/
+    - name: 安装supervisor
+      command: sudo apt-get install supervisor -y
+    - name: 添加环境变量
+      lineinfile:
+        dest: /etc/profile
+        line:  WORKER_PATH=/home/data/worker
+    - name: 创建脚本
+      command: touch /home/start_worker.sh
+    - name: add
+      lineinfile:
+        dest: /home/start_worker.sh
+        line: ip=`ifconfig -a|grep inet|grep -v 127.0.0.1|grep -v inet6|awk '{print $2}'|tr -d "addr:"`
+    - name: add
+      lineinfile:
+        dest: /home/start_worker.sh
+        line: exec lotus-worker run --listen=$ip:3456 > /home/worker.log 2>&1
+    - name: add
+      command: chmod +x /home/start_worker.sh
+    - name: touch
+      command: touch /etc/supervisor/conf.d/lotus_worker.conf
+####修改配置
+    - name: add
+      lineinfile:
+        dest: /etc/supervisor/conf.d/lotus_worker.conf 
+        line: ; /etc/supervisor/conf.d/lotus_worker.conf
+    - name: add
+      lineinfile:
+        dest: /etc/supervisor/conf.d/lotus_worker.conf 
+        line: '[program:lotus_worker]'
+    - name: add
+      lineinfile:
+        dest: /etc/supervisor/conf.d/lotus_worker.conf 
+        line: directory = /home/
+    - name: add
+      lineinfile:
+        dest: /etc/supervisor/conf.d/lotus_worker.conf 
+        line: user = root
+    - name: add
+      lineinfile:
+        dest: /etc/supervisor/conf.d/lotus_worker.conf 
+        line: startsecs = 900
+    - name: add
+      lineinfile:
+        dest: /etc/supervisor/conf.d/lotus_worker.conf 
+        line: command = bash start_worker.sh
+    - name: add
+      lineinfile:
+        dest: /etc/supervisor/conf.d/lotus_worker.conf 
+        line: redirect_stderr = true
+    - name: add
+      lineinfile:
+        dest: /etc/supervisor/conf.d/lotus_worker.conf 
+        line: redirect_stderr = true
+    - name: add
+      lineinfile:
+        dest: /etc/supervisor/conf.d/lotus_worker.conf 
+        line: stdout_logfile_maxbytes = 50MB
+    - name: add
+      lineinfile:
+        dest: /etc/supervisor/conf.d/lotus_worker.conf 
+        line: stdout_logfile_backups = 10
+    - name: add
+      lineinfile:
+        dest: /etc/supervisor/conf.d/lotus_worker.conf 
+        line: stdout_logfile = /var/log/supervisor/lotus_worker.log
+    - name: add
+      lineinfile:
+        dest: /etc/supervisor/conf.d/lotus_worker.conf 
+        line: autostart = true
+    - name: add
+      lineinfile:
+        dest: /etc/supervisor/conf.d/lotus_worker.conf 
+        line: autostart = true
+    - name: add
+      lineinfile:
+        dest: /etc/supervisor/conf.d/lotus_worker.conf 
+        line: autorestart = true
+    - name: add
+      lineinfile:
+        dest: /etc/supervisor/conf.d/lotus_worker.conf 
+        line: startretries = 5
+    - name: add
+      lineinfile:
+        dest: /etc/supervisor/conf.d/lotus_worker.conf 
+        line: redirect_stderr = true
+    - name: chmod
+      command: chmod +r /etc/supervisor/conf.d/lotus_worker.conf
